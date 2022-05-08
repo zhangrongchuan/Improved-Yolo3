@@ -2,8 +2,8 @@
 Tiny Object Detection Using Improved Yolo3 from Seagull Datase
 ## Background
 
-## Install
-
+## Environment
+`` $ pip install -r requirements.txt ``
 ## Data preparing
 
 ## Train
