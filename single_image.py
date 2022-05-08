@@ -5,13 +5,13 @@ from dataset import seagull_dataset
 from utils import filter_pred_bbox
 from PIL import ImageDraw
 import torch
+import config
 
 def detect_single_image():
     convert_PIL=transforms.ToPILImage()
     test_set=seagull_dataset("train.txt",get_truth=True)
-    #cleaned_dataset到200张图片是干净的
     test_loader=DataLoader(dataset=test_set,batch_size=1,shuffle=True)
-    model=torch.load("8488.pkl")
+    model=torch.load(config.WEIGHT_RESTORE_PATH)
     for data in test_loader:
         image,_,_,truth=data
         f1,f2=model(image)
