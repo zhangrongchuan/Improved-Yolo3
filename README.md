@@ -17,7 +17,7 @@ Tiny Object Detection Using Improved Yolo3 from Seagull Datase
 2. The organize directories is shown below:  
 ![avatar](illustrate/dir.png)
 
-3. run parse_voc_xml.py file to generate train.txt and val.txt using command:  
+3. run parse_voc_xml.py file to generate **train.txt** and **val.txt** using command:  
 ``$  python parse_voc_xml.py ``
 
 ## Train
