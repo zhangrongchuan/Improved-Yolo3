@@ -1,7 +1,7 @@
 import torch
 
-#DEVICE=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-DEVICE=torch.device("cpu")
+DEVICE=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+#DEVICE=torch.device("cpu")
 
 WEIGHT_RESTORE_PATH="weight.pkl"
 WEIGHT_SAVE_PATH="weight.pkl"
