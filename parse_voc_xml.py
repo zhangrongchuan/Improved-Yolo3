@@ -57,10 +57,10 @@ def gen_test_txt(txt_path):
         img_names = open(path, 'r').readlines()
         for img_name in img_names:
             img_name = img_name.strip()
-            xml_path = anno_path[i] +"/train"+ '/' + img_name + '.xml'
+            xml_path = anno_path[i] +"/test"+ '/' + img_name + '.xml'
             objects = parse_xml(xml_path)
             if objects:
-                objects[0] = img_path[i] +"/train"+ '/' + img_name + '.jpg'
+                objects[0] = img_path[i] +"/test"+ '/' + img_name + '.jpg'
                 if os.path.exists(objects[0]):
                     #objects.insert(0, str(test_cnt))
                     #test_cnt += 1
