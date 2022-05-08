@@ -9,7 +9,7 @@ import config
 
 def detect_single_image():
     convert_PIL=transforms.ToPILImage()
-    test_set=seagull_dataset("train.txt",get_truth=True)
+    test_set=seagull_dataset("val.txt",get_truth=True)
     test_loader=DataLoader(dataset=test_set,batch_size=1,shuffle=True)
     model=torch.load(config.WEIGHT_RESTORE_PATH)
     for data in test_loader:
