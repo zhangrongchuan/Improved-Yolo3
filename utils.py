@@ -138,6 +138,7 @@ def evaluate(data_loader,model,writer,epoch,type_of_eval,threshold=config.AP_IOU
 
     for data in data_loader:
         image,_,_,truth=data
+        image=image.to(config.DEVICE)
         f1,f2=model(image)
         result=filter_pred_bbox(f1,f2)[0]
         
