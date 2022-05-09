@@ -27,7 +27,7 @@ Tiny Object Detection Using Improved Yolo3 from Seagull Datase
 ``$  python train.py ``
 
 ## Test single image
-You can test random single image of testset using command:
-``$  python single_image.py ``
+You can test random single image of testset using command:  
+``$  python test_single_image.py ``
 
 ## Evaluate
