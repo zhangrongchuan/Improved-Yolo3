@@ -13,8 +13,8 @@ def loss1(down_sample,predict,target):
     
     height=int(256/down_sample)
     width =int(256/down_sample)
-    y=torch.linspace(0,height-1,height).repeat(height,1).repeat(1,1).view(height,height).type(Tensor)
-    x=torch.linspace(0,height-1,height).repeat(height,1).t().repeat(1,1).view(height,height).type(Tensor)
+    y=torch.linspace(0,height-1,height).repeat(height,1).repeat(1,1).view(height,height).type(Tensor).to(config.DEVICE)
+    x=torch.linspace(0,height-1,height).repeat(height,1).t().repeat(1,1).view(height,height).type(Tensor).to(config.DEVICE)
 
     predict = predict.view(batch_size,5,height,width).permute(0,2,3,1).contiguous()
     total_Loss=0
@@ -88,8 +88,8 @@ def loss2(down_sample,predict,target):
     
     height=int(256/down_sample)
     width =int(256/down_sample)
-    y=torch.linspace(0,height-1,height).repeat(height,1).repeat(1,1).view(height,height).type(Tensor)
-    x=torch.linspace(0,height-1,height).repeat(height,1).t().repeat(1,1).view(height,height).type(Tensor)
+    y=torch.linspace(0,height-1,height).repeat(height,1).repeat(1,1).view(height,height).type(Tensor).to(config.DEVICE)
+    x=torch.linspace(0,height-1,height).repeat(height,1).t().repeat(1,1).view(height,height).type(Tensor).to(config.DEVICE)
 
     predict = predict.view(batch_size,5,height,width).permute(0,2,3,1).contiguous()
     total_Loss=0
