@@ -29,8 +29,8 @@ class Decode(nn.Module):
             p=torch.sigmoid(prediction[...,4])
 
             #计算调整以后先验框的位置
-            grid_y=torch.linspace(0,input_height-1,input_width).repeat(input_height,1).repeat(1,1).view(input_height,input_width).type(Tensor)
-            grid_x=torch.linspace(0,input_width-1,input_height).repeat(input_height,1).t().repeat(1,1).view(input_height,input_width).type(Tensor)
+            grid_y=torch.linspace(0,input_height-1,input_width).repeat(input_height,1).repeat(1,1).view(input_height,input_width).type(Tensor).to(config.DEVICE)
+            grid_x=torch.linspace(0,input_width-1,input_height).repeat(input_height,1).t().repeat(1,1).view(input_height,input_width).type(Tensor).to(config.DEVICE)
 
             pred_boxs=Tensor(prediction.shape)
             pred_boxs[...,0]= (grid_x + x.data)*scale
