@@ -12,7 +12,7 @@ Tiny Object Detection Using Improved Yolo3 from Seagull Datase
 ``$ pip install -r requirements.txt ``
 
 ## Data preparing
-1. The seagull dataset could be downloaded from this link(https://drive.google.com/file/d/1zzivc2h6sSw3ftZ-wPU7jH9DaOLKETEL/view?usp=sharing)
+1. The seagull dataset could be downloaded from **[this link](https://drive.google.com/file/d/1zzivc2h6sSw3ftZ-wPU7jH9DaOLKETEL/view?usp=sharing)**
 
 2. The organize directories is shown below:  
 ![avatar](illustrate/dir.png)
