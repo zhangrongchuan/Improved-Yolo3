@@ -70,9 +70,9 @@ def judge_correct(res, target, threshold):
             Iou=iou(i,j)
             iou_per_groundtruth.append(Iou)
         if max(iou_per_groundtruth)>threshold:
-            tp_label[index]=[i[4],torch.Tensor(max(iou_per_groundtruth)),torch.ones(1)]
+            tp_label[index]=[i[4],torch.tensor(max(iou_per_groundtruth)),torch.ones(1)]
         else:
-            tp_label[index]=[i[4],torch.Tensor(max(iou_per_groundtruth)),torch.zeros(1)]
+            tp_label[index]=[i[4],torch.tensor(max(iou_per_groundtruth)),torch.zeros(1)]
 
     return tp_label, len(target)
 
@@ -98,8 +98,8 @@ def get_pr_curve(total_pt_label, total_target_count):
         correct_num+=pred[2]
         pred[1],pred[2]= correct_num/(i+1), correct_num/total_target_count  #precision, recall
         pred=torch.reshape(pred,[1,3])
-        pr_curve=torch.concat([pr_curve,pred],dim=0)
-    pr_curve=torch.concat([pr_curve,torch.Tensor([[0,0,1]])],dim=0)
+        pr_curve=torch.cat([pr_curve,pred],dim=0)
+    pr_curve=torch.cat([pr_curve,torch.tensor([[0,0,1]])],dim=0)
     
     return pr_curve
 
@@ -113,7 +113,7 @@ def calculate_ap_value(pr_curve):
     '''
     temp_recall=0
     ap=0
-    pr_curve.to(config.DEVICE)
+    pr_curve=pr_curve.to(config.DEVICE)
     #找出precision的最大值
     while(not temp_recall==1):
         index=torch.max(pr_curve,dim=0)[1][1]
@@ -141,8 +141,8 @@ def evaluate(data_loader,model,writer,epoch,type_of_eval,threshold=config.AP_IOU
         result=filter_pred_bbox(f1,f2)[0]
         
         label, target_num=judge_correct(result,truth,threshold=threshold)
-        label=torch.Tensor(label)
-        total_pt_label=torch.concat([label,total_pt_label],dim=0)
+        label=torch.tensor(label)
+        total_pt_label=torch.cat([label,total_pt_label],dim=0)
         total_target_count+=target_num
 
         data_loader.update(1)

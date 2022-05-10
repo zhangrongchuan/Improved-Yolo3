@@ -140,11 +140,11 @@ class DarkNet(nn.Module):
         out3 = self.layer3(out2)
         out4 = self.layer4(out3)
 
-        out3 = torch.concat([self.Upsampling32(self.conv4_3(out4)),out3],1)
+        out3 = torch.cat([self.Upsampling32(self.conv4_3(out4)),out3],1)
 
         feature2 = self.head2(out4)
 
-        out2 = torch.concat([self.Upsampling64(self.conv3_2(out3)),out2],1)
+        out2 = torch.cat([self.Upsampling64(self.conv3_2(out3)),out2],1)
 
         feature1 = self.head1(out2) #大scale预测小物体
 
