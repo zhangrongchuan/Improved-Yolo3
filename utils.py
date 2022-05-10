@@ -3,7 +3,6 @@ from dataset import seagull_dataset
 from decode import Decode
 from tqdm import tqdm
 import torch.nn as nn
-import numpy as np
 import config
 import torch
 import time
@@ -48,7 +47,7 @@ def iou(rec1,rec2):
     area1=(rec1[3]-rec1[1])*(rec1[2]-rec1[0])
     area2=(rec2[3]-rec2[1])*(rec2[2]-rec2[0])
     if w<=0 or h<=0:
-        return 0
+        return torch.zeros(1)
     else:
         iou=(intersection)/(area2+area1-intersection+1e-7)
         return iou
@@ -62,8 +61,7 @@ def judge_correct(res, target, threshold):
         tp_label:一个list,分别为confidence,iou,是否是tp(1/0),因此shape=(n*3)
         len(target):每张图片有多少个目标,用于计算整个数据集有多少个target
     '''
-    target=target.detach().numpy()[0]
-    res=res.detach().numpy()
+    target=target[0]
 
     tp_label=[ [] for i in range(len(res))] #conf,iou,tp
     for index, i in enumerate(res):
@@ -72,9 +70,9 @@ def judge_correct(res, target, threshold):
             Iou=iou(i,j)
             iou_per_groundtruth.append(Iou)
         if max(iou_per_groundtruth)>threshold:
-            tp_label[index]=[i[4],max(iou_per_groundtruth),1]
+            tp_label[index]=[i[4],torch.Tensor(max(iou_per_groundtruth)),torch.ones(1)]
         else:
-            tp_label[index]=[i[4],max(iou_per_groundtruth),0]
+            tp_label[index]=[i[4],torch.Tensor(max(iou_per_groundtruth)),torch.zeros(1)]
 
     return tp_label, len(target)
 
@@ -93,15 +91,15 @@ def get_pr_curve(total_pt_label, total_target_count):
     当某个bbox预测正确: recall=tp/total,因此recall增加, precision也增加(如果100%就不变)
     当某个bbox预测错误: recall=tp/total,因此recall不变, precision减小
     '''
-    total_pt_label=torch.tensor(total_pt_label)
     total_pt_label,_=torch.sort(total_pt_label,dim=0,descending=True)
-    pr_curve=[np.array([1,1,0],dtype="float32")]
+    pr_curve=torch.tensor([[1,1,0]])
     correct_num=0
     for i , pred in enumerate(total_pt_label):
         correct_num+=pred[2]
         pred[1],pred[2]= correct_num/(i+1), correct_num/total_target_count  #precision, recall
-        pr_curve.append(pred.detach().numpy())
-    pr_curve.append(np.array([0,0,1],dtype="float32"))
+        pred=torch.reshape(pred,[1,3])
+        pr_curve=torch.concat([pr_curve,pred],dim=0)
+    pr_curve=torch.concat([pr_curve,torch.Tensor([[0,0,1]])],dim=0)
     
     return pr_curve
 
@@ -115,7 +113,7 @@ def calculate_ap_value(pr_curve):
     '''
     temp_recall=0
     ap=0
-    pr_curve=torch.Tensor(pr_curve)
+    pr_curve.to(config.DEVICE)
     #找出precision的最大值
     while(not temp_recall==1):
         index=torch.max(pr_curve,dim=0)[1][1]
@@ -134,7 +132,7 @@ def evaluate(data_loader,model,writer,epoch,type_of_eval,threshold=config.AP_IOU
     data_loader.set_description("Evaluate")
     
     total_target_count=0
-    total_pt_label=[]
+    total_pt_label=torch.ones([1,3])
 
     for data in data_loader:
         image,_,_,truth=data
@@ -143,7 +141,8 @@ def evaluate(data_loader,model,writer,epoch,type_of_eval,threshold=config.AP_IOU
         result=filter_pred_bbox(f1,f2)[0]
         
         label, target_num=judge_correct(result,truth,threshold=threshold)
-        total_pt_label+=label
+        label=torch.Tensor(label)
+        total_pt_label=torch.concat([label,total_pt_label],dim=0)
         total_target_count+=target_num
 
         data_loader.update(1)
@@ -152,29 +151,27 @@ def evaluate(data_loader,model,writer,epoch,type_of_eval,threshold=config.AP_IOU
     ap=calculate_ap_value(pr_curve)
     if type_of_eval==0:
         print("The ap of the trainset is "+str(ap)[7:-1])
-        writer.add_scalar(tag="ap",scalar_value=ap,global_step=epoch)
+        writer.add_scalar(tag="train_ap",scalar_value=ap,global_step=epoch)
     elif type_of_eval==1:
-        print("The ap of the valset is "+str(ap)[7:-1])
-        writer.add_scalar(tag="test_ap",scalar_value=ap,global_step=epoch)
-    elif type_of_eval==2:
         print("The ap of the testset is "+str(ap)[7:-1])
+        writer.add_scalar(tag="test_ap",scalar_value=ap,global_step=epoch)
     return ap
 
-def get_dataloader(train_path,val_path,test_path):
+def get_dataloader(train_path,train_val_path,val_path,test_path):
 
     train_set=seagull_dataset(train_path)
     train_loader=DataLoader(dataset=train_set,batch_size=config.BATCH_SIZE,shuffle=True)
 
-    train_set_eval=seagull_dataset(train_path,get_truth=True)
+    train_set_eval=seagull_dataset(train_val_path,get_truth=True)
     train_eval_loader=DataLoader(dataset=train_set_eval,batch_size=1,shuffle=True)
 
-    val_set=seagull_dataset(val_path,get_truth=True)
+    val_set=seagull_dataset(val_path,get_truth=False)
     val_loader=DataLoader(dataset=val_set,batch_size=1,shuffle=True)
 
     test_set=seagull_dataset(test_path,get_truth=True)
     test_loader=DataLoader(dataset=test_set,batch_size=1,shuffle=True)
 
-    return train_loader,train_eval_loader,val_loader, test_loader
+    return train_loader, train_eval_loader, val_loader, test_loader
     
 
 def write_logs(writer,x,y,w,h,c_obj,c_noobj,Total_Loss,step):
@@ -197,6 +194,6 @@ def get_lr(epoch,pretrained):
     elif epoch<150:#40
         lr=1e-07 #0.0000001
     else:#5
-        lr=1e-08
+        lr=1e-08 #0.00000001
     
     return lr
