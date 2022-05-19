@@ -63,7 +63,7 @@ def loss1(down_sample,predict,target):
             loss_c_noobj=MSELoss(predict_noobj[...,4],target_noobj[...,4])
 
             #--------------------------------------------------------------------------------------------------
-            total_Loss+=(loss_x.sum() + loss_y.sum() + (loss_c.sum()/obj_num + loss_c_noobj.sum()/no_obj_num)*2 + loss_w.sum() + loss_h.sum())
+            total_Loss+=(loss_x.sum() + loss_y.sum() + (loss_c.sum()/obj_num + loss_c_noobj.sum()/no_obj_num) + loss_w.sum() + loss_h.sum())
         #---------------------------------------------------------------------------------------------------
             x1+=loss_x.sum()
             x2+=loss_y.sum()
@@ -107,7 +107,7 @@ def loss2(down_sample,predict,target):
         if obj_num==0:
             predict_noobj = predict[i][no_obj_mask]
             predict_noobj[...,4]=torch.sigmoid(predict_noobj[...,4]).float()
-            loss_c_noobj=-torch.log(1-predict_noobj[...,4])
+            loss_c_noobj=-torch.log(1-predict_noobj[...,4]+0.000001)
             total_Loss+=loss_c_noobj.sum()/no_obj_num
         else:
             target[i,...,0]-=x.float()
@@ -124,18 +124,24 @@ def loss2(down_sample,predict,target):
             predict_obj[...,4]=torch.sigmoid(predict_obj[...,4]).float()
             
             loss_x=MSELoss(predict_obj[...,0],target_obj[...,0])
+            loss_x=torch.where(torch.isnan(loss_x), torch.full_like(loss_x, 0), loss_x)
             loss_y=MSELoss(predict_obj[...,1],target_obj[...,1])
+            loss_y=torch.where(torch.isnan(loss_y), torch.full_like(loss_y, 0), loss_y)
             loss_w=MSELoss(predict_obj[...,2],target_obj[...,2])
+            loss_w=torch.where(torch.isnan(loss_w), torch.full_like(loss_w, 0), loss_w)
             loss_h=MSELoss(predict_obj[...,3],target_obj[...,3])
-            loss_c=-torch.log(predict_obj[...,4])
+            loss_h=torch.where(torch.isnan(loss_h), torch.full_like(loss_h, 0), loss_h)
+            loss_c=-torch.log(predict_obj[...,4]+0.000001)
+            loss_c=torch.where(torch.isnan(loss_c), torch.full_like(loss_c, 0), loss_c)
             #-------------------------负样本的loss-----------------------------------
             predict_noobj = predict[i][no_obj_mask]
             predict_noobj[...,4]=torch.sigmoid(predict_noobj[...,4]).float()
 
-            loss_c_noobj=-torch.log(1-predict_noobj[...,4])
+            loss_c_noobj=-torch.log(1-predict_noobj[...,4]+0.000001)
+            loss_c_noobj=torch.where(torch.isnan(loss_c_noobj), torch.full_like(loss_c_noobj, 0), loss_c_noobj)
 
             #--------------------------------------------------------------------------------------------------
-            total_Loss+=(loss_x.sum() + loss_y.sum() + loss_c.sum()*2/obj_num + loss_c_noobj.sum()/no_obj_num + loss_w.sum() + loss_h.sum())
+            total_Loss+=(loss_x.sum() + loss_y.sum() + loss_c.sum()/obj_num + loss_c_noobj.sum()/no_obj_num + loss_w.sum() + loss_h.sum())
         #---------------------------------------------------------------------------------------------------
             x1+=loss_x.sum()
             x2+=loss_y.sum()

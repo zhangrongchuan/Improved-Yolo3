@@ -3,20 +3,22 @@ from torchvision import transforms
 from torch import Tensor
 from PIL import Image
 import numpy as np
+import config
 import torch
 class seagull_dataset(Dataset):
-    def __init__(self,train_path,get_truth=False,transforms=transforms.ToTensor()):
+    def __init__(self,train_path,get_truth=False,transform=False):
         image=[]
         label1=[]
         label2=[]
         all_obj=[]
+        self.transform=transform
         f = open(train_path,"r")
         for line in f:
             obj=[]
             line=[i for i in line.split(" ")]
 #---------------------------------------transforms---------------------------------------------
             single_image=Image.open(line[0])
-            single_image=transforms(single_image)
+            single_image=transforms.ToTensor()(single_image).to(config.DEVICE)
             image.append(single_image)
 #----------------------------------------------------------------------------------------------
             single_label=line[3:]
@@ -74,9 +76,12 @@ class seagull_dataset(Dataset):
         self.get_truth=get_truth
     
     def __getitem__(self, index):
+        image=self.image[index]
         if self.get_truth:
-            return self.image[index], self.label1[index], self.label2[index], self.all_obj[index]
+            return image, self.label1[index], self.label2[index], self.all_obj[index]
         else:
-            return self.image[index], self.label1[index], self.label2[index]
+            if self.transform:
+                image=config.transform(image)
+            return image, self.label1[index], self.label2[index]
     def __len__(self):
         return len(self.image)

@@ -151,15 +151,15 @@ def evaluate(data_loader,model,writer,epoch,type_of_eval,threshold=config.AP_IOU
     ap=calculate_ap_value(pr_curve)
     if type_of_eval==0:
         print("The ap of the trainset is "+str(ap)[7:-1])
-        writer.add_scalar(tag="train_ap",scalar_value=ap,global_step=epoch)
+        writer.add_scalar(tag="train_ap",scalar_value=ap,global_step=epoch+49)
     elif type_of_eval==1:
         print("The ap of the testset is "+str(ap)[7:-1])
-        writer.add_scalar(tag="test_ap",scalar_value=ap,global_step=epoch)
+        writer.add_scalar(tag="test_ap",scalar_value=ap,global_step=epoch+49)
     return ap
 
 def get_dataloader(train_path,train_val_path,val_path,test_path):
 
-    train_set=seagull_dataset(train_path)
+    train_set=seagull_dataset(train_path,get_truth=False,transform=True)
     train_loader=DataLoader(dataset=train_set,batch_size=config.BATCH_SIZE,shuffle=True)
 
     train_set_eval=seagull_dataset(train_val_path,get_truth=True)
@@ -187,13 +187,13 @@ def write_logs(writer,x,y,w,h,c_obj,c_noobj,Total_Loss,step):
 def get_lr(epoch,pretrained):
     if not pretrained and epoch<config.INITIAL_EPOCH:#5
         lr=1e-04 #0.0001
-    elif epoch<15:#10
-        lr=1e-05 #0.00001
-    elif epoch<120:#90
-        lr=1e-06 #0.000001
+    elif epoch<30:#10
+        lr=1e-05*(1-0.0005*(epoch)) #0.00001
+    elif epoch<100:#90
+        lr=1e-06*(1-0.0005*(epoch-30)) #0.000001
     elif epoch<150:#40
         lr=1e-07 #0.0000001
     else:#5
         lr=1e-08 #0.00000001
-    
+
     return lr

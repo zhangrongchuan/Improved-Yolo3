@@ -18,12 +18,13 @@ def main():
     model.train().to(config.DEVICE)
     model.eval().to(config.DEVICE)
     writer=SummaryWriter(config.LOG_PATH)
-
+    #optimizer=torch.optim.Adam(model.parameters(),lr=0.000001)
+    
     for epoch in range(config.NUM_EPOCH):
         train_loader=tqdm(train_loader)
         train_loader.set_description("epoch "+str(epoch+1)+" train")
         optimizer=torch.optim.Adam(model.parameters(),lr=get_lr(epoch,config.PRE_TRAINED))
-        #optimizer=torch.optim.Adam(model.parameters(),lr=0.000001)
+        #optimizer=torch.optim.Adam(model.parameters(),lr=0.00001*(1-epoch*0.0005))
         for data in train_loader:
             image,l1,l2=data
             image,l1,l2=image.to(config.DEVICE),l1.to(config.DEVICE),l2.to(config.DEVICE)
@@ -55,11 +56,11 @@ def main():
             val_loader.set_postfix(Total_loss=Total_Loss.data,loss_x=x,loss_y=y,loss_w=w,loss_h=h,loss_obj=c_obj,loss_noobj=c_noobj)
             time.sleep(0.1)
             train_loader.update(1)
-        #if epoch>20:
+        #if epoch>5:
         evaluate(train_val_loader,model,writer,epoch,0)# trainset eval
         evaluate(test_loader,model,writer,epoch,1)# testset eval
 
-        torch.save(model,config.WEIGHT_SAVE_PATH)
+        torch.save(model,config.WEIGHT_SAVE_PATH+str(epoch)+".pkl")
 
 if __name__ == "__main__":
     main()
