@@ -103,9 +103,10 @@ def loss2(down_sample,predict,target):
         obj_mask=(target[i,...,4]==1).squeeze()
         obj_num=torch.sum(obj_mask)
         no_obj_num=torch.sum(no_obj_mask)
-
-        means=float(torch.abs(predict[i][...,4]).sum()/(obj_num+no_obj_num))
-        predict[i][...,4]=predict[i][...,4]/means
+        
+#         归一化 
+#         means=float(torch.abs(predict[i][...,4]).sum()/(obj_num+no_obj_num))
+#         predict[i][...,4]=predict[i][...,4]/means
 
         if obj_num==0:
             predict_noobj = predict[i][no_obj_mask]
