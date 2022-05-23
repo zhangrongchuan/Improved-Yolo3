@@ -104,6 +104,9 @@ def loss2(down_sample,predict,target):
         obj_num=torch.sum(obj_mask)
         no_obj_num=torch.sum(no_obj_mask)
 
+        means=float(torch.abs(predict[i][...,4]).sum()/(obj_num+no_obj_num))
+        predict[i][...,4]=predict[i][...,4]/means
+
         if obj_num==0:
             predict_noobj = predict[i][no_obj_mask]
             predict_noobj[...,4]=torch.sigmoid(predict_noobj[...,4]).float()

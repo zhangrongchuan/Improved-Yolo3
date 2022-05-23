@@ -6,15 +6,16 @@ from loss import loss
 import torch.optim 
 import config
 import time
+import test_single_image
 
 def main():
 
     train_loader, train_val_loader, val_loader, test_loader=get_dataloader(config.TRAIN_SET_PATH,config.TRAIN_SET_VAL_PATH,config.VAL_SET_PATH,config.TEST_SET_PATH)
+    
+    model=DarkNet().to(config.DEVICE)
     if config.PRE_TRAINED:
-        model=torch.load(config.WEIGHT_RESTORE_PATH).to(config.DEVICE)
-    else:
-        model=DarkNet().to(config.DEVICE)
-
+        model.load_state_dict(torch.load(config.WEIGHT_RESTORE_PATH))
+#     model=torch.load(config.WEIGHT_RESTORE_PATH).to(config.DEVICE)
     model.train().to(config.DEVICE)
     model.eval().to(config.DEVICE)
     writer=SummaryWriter(config.LOG_PATH)
@@ -23,8 +24,8 @@ def main():
     for epoch in range(config.NUM_EPOCH):
         train_loader=tqdm(train_loader)
         train_loader.set_description("epoch "+str(epoch+1)+" train")
-        optimizer=torch.optim.Adam(model.parameters(),lr=get_lr(epoch,config.PRE_TRAINED))
-        #optimizer=torch.optim.Adam(model.parameters(),lr=0.00001*(1-epoch*0.0005))
+        #optimizer=torch.optim.Adam(model.parameters(),lr=get_lr(epoch,config.PRE_TRAINED))
+        optimizer=torch.optim.Adam(model.parameters(),lr=0.000001*(1-epoch*0.0005))
         for data in train_loader:
             image,l1,l2=data
             image,l1,l2=image.to(config.DEVICE),l1.to(config.DEVICE),l2.to(config.DEVICE)
@@ -60,7 +61,8 @@ def main():
         evaluate(train_val_loader,model,writer,epoch,0)# trainset eval
         evaluate(test_loader,model,writer,epoch,1)# testset eval
 
-        torch.save(model,config.WEIGHT_SAVE_PATH+str(epoch)+".pkl")
+        torch.save(model.state_dict(),config.WEIGHT_SAVE_PATH+str(epoch)+".pth")
+#         torch.save(model,config.WEIGHT_SAVE_PATH+str(epoch)+".pkl")
 
 if __name__ == "__main__":
     main()

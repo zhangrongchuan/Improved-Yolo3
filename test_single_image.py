@@ -4,16 +4,21 @@ from torchvision import transforms
 from dataset import seagull_dataset
 from utils import filter_pred_bbox
 from PIL import ImageDraw
+from model import DarkNet
 import torch
 import config
 
 def detect_single_image():
     convert_PIL=transforms.ToPILImage()
-    test_set=seagull_dataset("val.txt",get_truth=True)
-    test_loader=DataLoader(dataset=test_set,batch_size=1,shuffle=True)
-    model=torch.load(config.WEIGHT_RESTORE_PATH)
+    test_set=seagull_dataset("train.txt",get_truth=True)
+    test_loader=DataLoader(dataset=test_set,batch_size=1,shuffle=False)
+    model=DarkNet().to(config.DEVICE)
+    model.load_state_dict(torch.load(config.WEIGHT_RESTORE_PATH))
+    model.train().to(config.DEVICE)
+    model.eval().to(config.DEVICE)
     for data in test_loader:
         image,_,_,truth=data
+        image=image.to(config.DEVICE)
         f1,f2=model(image)
         result=filter_pred_bbox(f1,f2)[0]
 
