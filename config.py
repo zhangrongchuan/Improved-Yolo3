@@ -3,8 +3,8 @@ from torchvision import transforms
 DEVICE=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 #DEVICE=torch.device("cpu")
 
-WEIGHT_RESTORE_PATH="w/weight2.pth"#"../autodl-tmp/weight79.pth" #"w/para.pth"
-WEIGHT_SAVE_PATH="../autodl-tmp/weight"
+WEIGHT_RESTORE_PATH="weight.pth"
+WEIGHT_SAVE_PATH="w/weight"
 LOG_PATH="logs"
 
 TRAIN_SET_PATH = "train.txt"
