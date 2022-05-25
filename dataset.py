@@ -81,7 +81,3 @@ class seagull_dataset(Dataset):
             return image, label1, label2
     def __len__(self):
         return len(self.image_path)
-dataset=seagull_dataset("val.txt",get_truth=True)
-dataset=DataLoader(dataset=dataset,batch_size=2)
-for i in dataset:
-    break
